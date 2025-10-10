@@ -51,3 +51,9 @@ class GridSprite(pygame.sprite.Sprite):
             return (col, row)
         
         return None
+    
+    
+    def get_cell_center(self, cell):
+        x_pos = (self.cell_size * (cell[0] + 1) - self.cell_size / 2) + self.rect.x
+        y_pos = (self.cell_size * (cell[1] + 1) - self.cell_size / 2) + self.rect.y
+        return (x_pos, y_pos)
