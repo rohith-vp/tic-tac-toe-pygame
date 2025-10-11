@@ -46,5 +46,5 @@ If you just want to play the game, **download the latest prebuilt binary** for y
 To build your own standalone binary using PyInstaller:
 
 ```bash
-uv run pyinstaller --onefile --windowed --icon=app/res/icon.ico --add-data "app/res;res" app/main.py
+uv run pyinstaller --onefile --windowed --icon=icon.ico --add-data=assets:assets ./app/main.py
 ```
