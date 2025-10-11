@@ -48,19 +48,3 @@ To build your own standalone binary using PyInstaller:
 ```bash
 uv run pyinstaller --onefile --windowed --icon=app/res/icon.ico --add-data "app/res;res" app/main.py
 ```
-
-### Project Structure
-
-tic-tac-toe-pygame/
-├── app/
-│   ├── main.py           # Main game script
-│   ├── res/              # Resources (icons, fonts, images)
-│   │   ├── icon.ico
-│   │   ├── font.ttf
-│   │   └── bg.jpg
-│   └── __init__.py
-├── pyproject.toml        # UV & project configuration
-├── uv.lock               # Locked dependencies
-├── dist/                 # Compiled binaries (after PyInstaller build)
-├── build/                # PyInstaller temporary build folder
-└── README.md
