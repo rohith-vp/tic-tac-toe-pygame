@@ -2,8 +2,9 @@ import pygame
 import os
 import sys
 
-from GridSprite import GridSprite
+from Grid import Grid
 from MarkSprite import MarkSprite, X_SPRITE, O_SPRITE
+from AnimatedLine import AnimatedLine
 
 
 class Game:
@@ -36,11 +37,16 @@ class Game:
         
         self.load_sprites()
 
+        self.line = AnimatedLine(
+            self.grid.get_cell_topleft((0, 0)),
+            self.grid.get_cell_bottomright((2, 2))
+        )
+
         self.running = False
 
 
     def load_sprites(self):
-        self.grid_sprite = GridSprite()
+        self.grid = Grid()
         self.mark_sprites = pygame.sprite.Group()
 
     
@@ -49,14 +55,14 @@ class Game:
 
         for cell in self.marks.keys():
             if self.marks[cell] is not None:
-                pos = self.grid_sprite.get_cell_center(cell)
+                pos = self.grid.get_cell_center(cell)
                 self.mark_sprites.add(
                     MarkSprite(pos, self.marks[cell])
                 )
 
 
     def mouse_clicked(self, pos):
-        cell = self.grid_sprite.cell_clicked(pos)
+        cell = self.grid.cell_clicked(pos)
 
         if cell is not None:
             print("Cell clicked: ", cell)
@@ -67,8 +73,9 @@ class Game:
     def render(self):
         self.screen.fill((0, 0, 0))
         self.screen.blit(self.title_text, self.title_rect)
-        self.screen.blit(self.grid_sprite.image, self.grid_sprite.rect)
+        self.grid.draw(self.screen)
         self.mark_sprites.draw(self.screen)
+        self.line.draw(self.screen)
         pygame.display.flip()
 
     
@@ -76,12 +83,12 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    mouse_pos = pygame.mouse.get_pos()
-                    print("Mouse clicked: ", mouse_pos)
-                    self.mouse_clicked(mouse_pos)
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_pos = pygame.mouse.get_pos()
+                print("Mouse clicked: ", mouse_pos)
+                self.mouse_clicked(mouse_pos)
 
+        self.line.update()
         self.render()
         self.clock.tick(self.fps)
 

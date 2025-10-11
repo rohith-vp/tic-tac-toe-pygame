@@ -1,7 +1,7 @@
 import pygame
 
 
-class GridSprite(pygame.sprite.Sprite):
+class Grid:
     def __init__(
             self,
             pos=(500, 400),
@@ -9,8 +9,6 @@ class GridSprite(pygame.sprite.Sprite):
             color=(255, 255, 255),
             width=2
                  ):
-        
-        super().__init__()
         self.pos = pos
         self.size = size
         self.color = color
@@ -33,6 +31,10 @@ class GridSprite(pygame.sprite.Sprite):
         for i in range(1, 3):
             x = i * self.cell_size
             pygame.draw.line(self.image, self.color, (x, 0), (x, self.size), self.width)
+
+        
+    def draw(self, screen: pygame.Surface):
+        screen.blit(self.image, self.rect)
 
 
     def cell_clicked(self, mouse_pos):
@@ -57,3 +59,28 @@ class GridSprite(pygame.sprite.Sprite):
         x_pos = (self.cell_size * (cell[0] + 1) - self.cell_size / 2) + self.rect.x
         y_pos = (self.cell_size * (cell[1] + 1) - self.cell_size / 2) + self.rect.y
         return (x_pos, y_pos)
+    
+
+    def get_cell_topleft(self, cell):
+        x_pos = (self.cell_size * cell[0]) + self.rect.x
+        y_pos = (self.cell_size * cell[1]) + self.rect.y
+        return (x_pos, y_pos)
+
+
+    def get_cell_topright(self, cell):
+        x_pos = (self.cell_size * (cell[0] + 1)) + self.rect.x
+        y_pos = (self.cell_size * cell[1]) + self.rect.y
+        return (x_pos, y_pos)
+    
+
+    def get_cell_bottomleft(self, cell):
+        x_pos = (self.cell_size * cell[0]) + self.rect.x
+        y_pos = (self.cell_size * (cell[1] + 1)) + self.rect.y
+        return (x_pos, y_pos)
+    
+
+    def get_cell_bottomright(self, cell):
+        x_pos = (self.cell_size * (cell[0] + 1)) + self.rect.x
+        y_pos = (self.cell_size * (cell[1] + 1)) + self.rect.y
+        return (x_pos, y_pos)
+
