@@ -1,5 +1,4 @@
 import pygame
-import os
 import sys
 
 from Grid import Grid
@@ -7,6 +6,8 @@ from MarkSprite import MarkSprite, X_SPRITE, O_SPRITE
 from AnimatedLine import AnimatedLine
 from Textbox import Textbox
 from PulsingText import PulsingText
+
+from utils import resource_path
 
 
 MODE_GAME_SELECTION = 0
@@ -22,7 +23,7 @@ class Game:
         pygame.font.init()
         pygame.display.set_caption(caption)
         pygame.display.set_icon(
-            pygame.image.load(os.path.join("assets", "tic-tac-toe.png"))
+            pygame.image.load(resource_path("assets/tic-tac-toe.png"))
         )
 
         self.size = size

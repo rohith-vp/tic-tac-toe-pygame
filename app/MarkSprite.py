@@ -1,5 +1,6 @@
 import pygame
-import os
+
+from utils import resource_path
 
 
 X_SPRITE = 0
@@ -24,7 +25,7 @@ class MarkSprite(pygame.sprite.Sprite):
         elif type == O_SPRITE:
             file_name = "O.png"
 
-        self.image = pygame.image.load(os.path.join("assets", file_name))
+        self.image = pygame.image.load(resource_path(f"assets/{file_name}"))
         self.image = pygame.transform.scale(self.image, size)
         self.rect = self.image.get_rect()
         self.rect.center = pos
