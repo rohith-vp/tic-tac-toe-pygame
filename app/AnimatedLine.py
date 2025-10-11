@@ -7,7 +7,7 @@ class AnimatedLine:
             start_pos,
             end_pos,
             speed=15,
-            color=(255, 100, 100),
+            color=(255, 50, 50),
             width=10
                 ):
         self.start_pos = start_pos

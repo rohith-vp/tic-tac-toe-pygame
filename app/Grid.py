@@ -4,11 +4,11 @@ import pygame
 class Grid:
     def __init__(
             self,
-            pos=(500, 400),
+            pos,
             size=400,
             color=(255, 255, 255),
             width=2
-                 ):
+                ):
         self.pos = pos
         self.size = size
         self.color = color

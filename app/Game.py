@@ -22,25 +22,14 @@ class Game:
             pygame.image.load(os.path.join("assets", "tic-tac-toe.png"))
         )
 
+        self.size = size
+        self.set_title(caption)
+        self.set_instruction_text("Click on a box to begin")
+
         # Intialize screen and clock for fps
         self.screen = pygame.display.set_mode(size)
         self.clock = pygame.time.Clock()
         self.fps = fps
-
-        title_font = pygame.font.Font(os.path.join("assets", "BitcountInk.ttf"), 56)
-        self.title_text = title_font.render(caption, True, (255, 255, 255))
-        self.title_rect = self.title_text.get_rect(center=(
-            self.screen.get_width() / 2, 
-            self.screen.get_height() / 8
-        ))
-
-        instruction_text_font = pygame.font.Font(os.path.join("assets", "0xProtoNerdFont-Regular.ttf"), 24)
-        self.instruction_text = instruction_text_font.render(
-            "Click on a box to begin", True, (255, 255, 255))
-        self.instruction_rect = self.instruction_text.get_rect(center=(
-            self.screen.get_width() / 2,
-            self.screen.get_height() / 1.1
-        ))
 
         # Board for storing X and O
         self.board = [
@@ -50,7 +39,7 @@ class Game:
         ]
         
         # Initialize grid
-        self.grid = Grid()
+        self.grid = Grid((size[0]/2, size[1]/2))
 
         # Sprite group for storing X and O marks
         self.mark_sprites = pygame.sprite.Group()
@@ -60,9 +49,28 @@ class Game:
         self.player_2 = "O"
         self.current_player = self.player_1
 
+        # Animated line for marking victory
+        self.line = None
+
         # Initialize game variables
         self.mode = MODE_GAME_SELECTION
         self.running = False
+
+    
+    def set_title(self, title: str):
+        title_font = pygame.font.Font(os.path.join("assets", "BitcountInk.ttf"), 56)
+        self.title_text = title_font.render(title, True, (255, 255, 255))
+        self.title_rect = self.title_text.get_rect(
+            center=( self.size[0] / 2 , self.size[1] / 8 )
+        )
+
+
+    def set_instruction_text(self, text: str):
+        instruction_text_font = pygame.font.Font(os.path.join("assets", "0xProtoNerdFont-Regular.ttf"), 24)
+        self.instruction_text = instruction_text_font.render(text, True, (255, 255, 255))
+        self.instruction_rect = self.instruction_text.get_rect(
+            center=( self.size[0] / 2 , self.size[1] / 1.1 )
+        )
 
     
     def update_mark_sprites(self):
@@ -90,24 +98,37 @@ class Game:
 
     def check_winner(self):
         # Rows
-        for row in self.board:
-            if row[0] == row[1] == row[2] != "":
-                return row[0]
-        
+        for y in range(0, 3):
+            if self.board[y][0] == self.board[y][1] == self.board[y][2] != "":
+                self.line = AnimatedLine(
+                    self.grid.get_cell_center((0, y)),
+                    self.grid.get_cell_center((2, y))
+                )
+                return self.board[y][0]
+            
         # Columns
-        for col in range(0, 3):
-            if self.board[0][col] == self.board[1][col] == self.board[2][col] != "":
-                return self.board[0][col]
+        for x in range(0, 3):
+            if self.board[0][x] == self.board[1][x] == self.board[2][x] != "":
+                self.line = AnimatedLine(
+                    self.grid.get_cell_center((x, 0)),
+                    self.grid.get_cell_center((x, 2))
+                )
+                return self.board[0][x]
             
         # Diagonals
         if self.board[0][0] == self.board[1][1] == self.board[2][2] != "":
-            return self.board[0][0]
+            self.line = AnimatedLine(
+                self.grid.get_cell_center((0, 0)),
+                self.grid.get_cell_center((2, 2))
+            )
+            return self.board[2][0]
 
         if self.board[0][2] == self.board[1][1] == self.board[2][0] != "":
+            self.line = AnimatedLine(
+                self.grid.get_cell_center((0, 2)),
+                self.grid.get_cell_center((2, 0))
+            )
             return self.board[0][2]
-
-        # No winner        
-        return ""
 
 
     def mouse_clicked(self, pos):
@@ -127,6 +148,10 @@ class Game:
         self.screen.blit(self.instruction_text, self.instruction_rect)
         self.grid.draw(self.screen)
         self.mark_sprites.draw(self.screen)
+        
+        if self.line is not None:
+            self.line.draw(self.screen)
+
         pygame.display.flip()
 
 
@@ -138,6 +163,9 @@ class Game:
                 mouse_pos = pygame.mouse.get_pos()
                 print("Mouse clicked: ", mouse_pos)
                 self.mouse_clicked(mouse_pos)
+
+        if self.line is not None:
+            self.line.update()
 
         self.render()
         self.clock.tick(self.fps)
