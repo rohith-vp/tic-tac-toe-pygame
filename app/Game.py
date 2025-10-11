@@ -5,11 +5,14 @@ import sys
 from Grid import Grid
 from MarkSprite import MarkSprite, X_SPRITE, O_SPRITE
 from AnimatedLine import AnimatedLine
+from Textbox import Textbox
+from PulsingText import PulsingText
 
 
 MODE_GAME_SELECTION = 0
 MODE_GAME_STARTING = 1
 MODE_GAME_PLAYING = 2
+MODE_GAME_ENDED = 3
 
 
 class Game:
@@ -23,23 +26,52 @@ class Game:
         )
 
         self.size = size
-        self.set_title(caption)
-        self.set_instruction_text("Click on a box to begin")
+
+        self.title = Textbox(
+            center=(size[0]/2, size[1]/8),
+            size=56,
+            font_path="assets/BitcountInk.ttf",
+            text=caption
+        )
+
+        self.main_text = PulsingText(
+            center=(size[0]/2, size[1]/2),
+            min_size=48,
+            max_size=62,
+            font_path="assets/FiraCode-Regular.ttf",
+            text="▶ Start"
+        )
+
+        self.instruction_text = Textbox(
+            center=(size[0]/2, size[1]/1.1),
+            size=24,
+            font_path="assets/0xProtoNerdFont-Regular.ttf",
+            text=""
+        )
 
         # Intialize screen and clock for fps
         self.screen = pygame.display.set_mode(size)
         self.clock = pygame.time.Clock()
         self.fps = fps
 
+        self.grid = None
+        self.line = None
+        
+        # Initialize game variables
+        self.mode = MODE_GAME_STARTING
+        self.running = False
+
+
+    def start_game(self):
         # Board for storing X and O
         self.board = [
             ["", "", ""],
             ["", "", ""],
             ["", "", ""]
         ]
-        
+
         # Initialize grid
-        self.grid = Grid((size[0]/2, size[1]/2))
+        self.grid = Grid((self.size[0]/2, self.size[1]/2))
 
         # Sprite group for storing X and O marks
         self.mark_sprites = pygame.sprite.Group()
@@ -48,31 +80,16 @@ class Game:
         self.player_1 = "X"
         self.player_2 = "O"
         self.current_player = self.player_1
+        self.next_player = self.player_2
 
         # Animated line for marking victory
         self.line = None
 
-        # Initialize game variables
-        self.mode = MODE_GAME_SELECTION
-        self.running = False
+        self.title.set_text(f"{self.current_player} is playing...")
 
+        self.mode = MODE_GAME_PLAYING
     
-    def set_title(self, title: str):
-        title_font = pygame.font.Font(os.path.join("assets", "BitcountInk.ttf"), 56)
-        self.title_text = title_font.render(title, True, (255, 255, 255))
-        self.title_rect = self.title_text.get_rect(
-            center=( self.size[0] / 2 , self.size[1] / 8 )
-        )
 
-
-    def set_instruction_text(self, text: str):
-        instruction_text_font = pygame.font.Font(os.path.join("assets", "0xProtoNerdFont-Regular.ttf"), 24)
-        self.instruction_text = instruction_text_font.render(text, True, (255, 255, 255))
-        self.instruction_rect = self.instruction_text.get_rect(
-            center=( self.size[0] / 2 , self.size[1] / 1.1 )
-        )
-
-    
     def update_mark_sprites(self):
         for x in range(0, 3):
             for y in range(0, 3):
@@ -89,11 +106,8 @@ class Game:
         
         if self.board[cell_y][cell_x] == "":
             self.board[cell_y][cell_x] = self.current_player
-
-            if self.current_player == self.player_1:
-                self.current_player = self.player_2
-            else:
-                self.current_player = self.player_1
+            self.current_player, self.next_player = self.next_player, self.current_player
+            self.title.set_text(f"{self.current_player} is playing...")
 
 
     def check_winner(self):
@@ -132,35 +146,61 @@ class Game:
 
 
     def mouse_clicked(self, pos):
-        cell = self.grid.cell_clicked(pos)
+        if self.mode == MODE_GAME_STARTING:
+            if self.main_text.check_click(pos):
+                self.start_game()
 
-        if cell is not None:
-            print("Cell clicked: ", cell)
-            self.make_move(cell)
-            self.update_mark_sprites()
-            winner = self.check_winner()
-            print("Winner:", winner)
+        elif self.mode == MODE_GAME_PLAYING:
+            cell = self.grid.cell_clicked(pos)
+
+            if cell is not None and self.mode == MODE_GAME_PLAYING:
+                print("Cell clicked:", cell)
+                self.make_move(cell)
+                self.update_mark_sprites()
+                winner = self.check_winner()
+
+                if winner is not None:
+                    print("Winner:", winner)
+                    self.mode = MODE_GAME_ENDED
+                    self.title.set_text(f"{self.next_player} wins!")
 
 
     def render(self):
         self.screen.fill((0, 0, 0))
-        self.screen.blit(self.title_text, self.title_rect)
-        self.screen.blit(self.instruction_text, self.instruction_rect)
-        self.grid.draw(self.screen)
-        self.mark_sprites.draw(self.screen)
-        
-        if self.line is not None:
-            self.line.draw(self.screen)
+        self.title.draw(self.screen)
+        self.instruction_text.draw(self.screen)
+
+        if self.mode == MODE_GAME_STARTING:
+
+            self.main_text.update()
+            self.main_text.draw(self.screen)
+
+        elif self.mode in (MODE_GAME_PLAYING, MODE_GAME_ENDED):
+
+            self.grid.draw(self.screen)
+            self.mark_sprites.draw(self.screen)
+
+            if self.line is not None:
+                self.line.draw(self.screen)
 
         pygame.display.flip()
 
 
     def loop(self):
+        mouse_pos = pygame.mouse.get_pos()
+
+        if (
+            (self.mode == MODE_GAME_STARTING and self.main_text.check_click(mouse_pos)) or
+            (self.mode == MODE_GAME_PLAYING and self.grid.cell_clicked(mouse_pos))
+            ):
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
+            elif (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1):
                 print("Mouse clicked: ", mouse_pos)
                 self.mouse_clicked(mouse_pos)
 
