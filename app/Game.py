@@ -6,6 +6,7 @@ from MarkSprite import MarkSprite, X_SPRITE, O_SPRITE
 from AnimatedLine import AnimatedLine
 from Textbox import Textbox
 from PulsingText import PulsingText
+from ChangingText import ChangingText
 
 from utils import resource_path
 
@@ -86,7 +87,16 @@ class Game:
         # Animated line for marking victory
         self.line = None
 
-        self.title.set_text(f"{self.current_player} is playing...")
+        self.title = ChangingText(
+            center=(self.size[0]/2, self.size[1]/8),
+            size=56,
+            font_path="assets/BitcountInk.ttf",
+            text_list=(
+                f"{self.current_player} is playing.",
+                f"{self.current_player} is playing..",
+                f"{self.current_player} is playing..."
+            )
+        )
 
         self.mode = MODE_GAME_PLAYING
     
@@ -108,7 +118,17 @@ class Game:
         if self.board[cell_y][cell_x] == "":
             self.board[cell_y][cell_x] = self.current_player
             self.current_player, self.next_player = self.next_player, self.current_player
-            self.title.set_text(f"{self.current_player} is playing...")
+
+            self.title = ChangingText(
+                center=(self.size[0]/2, self.size[1]/8),
+                size=56,
+                font_path="assets/BitcountInk.ttf",
+                text_list=(
+                    f"{self.current_player} is playing.",
+                    f"{self.current_player} is playing..",
+                    f"{self.current_player} is playing..."
+                )
+            )
 
 
     def check_winner(self):
@@ -144,6 +164,14 @@ class Game:
                 self.grid.get_cell_center((2, 0))
             )
             return self.board[0][2]
+        
+        # Draw
+        for y in range(0, 3):
+            for x in range(0, 3):
+                if self.board[y][x] == "":
+                    return ""
+            
+        return "TIE"
 
 
     def mouse_clicked(self, pos):
@@ -160,10 +188,28 @@ class Game:
                 self.update_mark_sprites()
                 winner = self.check_winner()
 
-                if winner is not None:
-                    print("Winner:", winner)
+                if winner == "TIE":
+                    
+                    self.title = PulsingText(
+                        center=(self.size[0]/2, self.size[1]/8),
+                        min_size=48,
+                        max_size=56,
+                        font_path="assets/BitcountInk.ttf",
+                        text=f"Its a TIE!"
+                    )
+
+                elif winner in ( self.player_1, self.player_2 ):
+                    
                     self.mode = MODE_GAME_ENDED
                     self.title.set_text(f"{self.next_player} wins!")
+                    
+                    self.title = PulsingText(
+                        center=(self.size[0]/2, self.size[1]/8),
+                        min_size=48,
+                        max_size=56,
+                        font_path="assets/BitcountInk.ttf",
+                        text=f"{self.next_player} wins!"
+                    )
 
 
     def render(self):
@@ -207,6 +253,8 @@ class Game:
 
         if self.line is not None:
             self.line.update()
+
+        self.title.update()
 
         self.render()
         self.clock.tick(self.fps)

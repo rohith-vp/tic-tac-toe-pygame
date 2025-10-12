@@ -36,7 +36,7 @@ If you just want to play the game, **download the latest prebuilt binary** for y
 3. Run the game:
 
     ```bash
-    uv run python -m app.main
+    uv run ./app/main.py
     ```
 
 ---

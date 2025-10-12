@@ -10,7 +10,7 @@ class Textbox:
             font_path: str,
             color=(255, 255, 255),
             text: str=""
-        ):
+    ):
         self.center = center
         self.size = size
         self.font_path = font_path
