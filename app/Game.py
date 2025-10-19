@@ -7,9 +7,16 @@ from AnimatedLine import AnimatedLine
 from Textbox import Textbox
 from PulsingText import PulsingText
 from ChangingText import ChangingText
+from Scoreboard import Scoreboard
 
 from utils import resource_path
 
+
+ICON = "assets/tic-tac-toe.png"
+
+TITLE_FONT = "assets/BitcountInk.ttf"
+MAIN_TEXT_FONT = "assets/FiraCode-Regular.ttf"
+INSTRUCTION_TEXT_FONT = "assets/0xProtoNerdFont-Regular.ttf"
 
 MODE_GAME_SELECTION = 0
 MODE_GAME_STARTING = 1
@@ -24,7 +31,7 @@ class Game:
         pygame.font.init()
         pygame.display.set_caption(caption)
         pygame.display.set_icon(
-            pygame.image.load(resource_path("assets/tic-tac-toe.png"))
+            pygame.image.load(resource_path(ICON))
         )
 
         self.size = size
@@ -32,7 +39,7 @@ class Game:
         self.title = Textbox(
             center=(size[0]/2, size[1]/8),
             size=56,
-            font_path="assets/BitcountInk.ttf",
+            font_path=TITLE_FONT,
             text=caption
         )
 
@@ -40,14 +47,14 @@ class Game:
             center=(size[0]/2, size[1]/2),
             min_size=48,
             max_size=62,
-            font_path="assets/FiraCode-Regular.ttf",
+            font_path=MAIN_TEXT_FONT,
             text="▶ Start"
         )
 
         self.instruction_text = Textbox(
             center=(size[0]/2, size[1]/1.1),
             size=24,
-            font_path="assets/0xProtoNerdFont-Regular.ttf",
+            font_path=INSTRUCTION_TEXT_FONT,
             text=""
         )
 
@@ -56,8 +63,12 @@ class Game:
         self.clock = pygame.time.Clock()
         self.fps = fps
 
+        # Create variables for grid and striking line
         self.grid = None
         self.line = None
+
+        # Create variable for scoreboard
+        self.scoreboard = None
         
         # Initialize game variables
         self.mode = MODE_GAME_STARTING
@@ -87,10 +98,11 @@ class Game:
         # Animated line for marking victory
         self.line = None
 
+        # Set title
         self.title = ChangingText(
             center=(self.size[0]/2, self.size[1]/8),
             size=56,
-            font_path="assets/BitcountInk.ttf",
+            font_path=TITLE_FONT,
             text_list=(
                 f"{self.current_player} is playing.",
                 f"{self.current_player} is playing..",
@@ -98,6 +110,13 @@ class Game:
             )
         )
 
+        # Initialize scoreboard
+        self.scoreboard = Scoreboard(
+            (self.size[0] / 2, self.size[1] - 100),
+            (500, 100)
+        )
+
+        # Set game mode
         self.mode = MODE_GAME_PLAYING
     
 
@@ -122,7 +141,7 @@ class Game:
             self.title = ChangingText(
                 center=(self.size[0]/2, self.size[1]/8),
                 size=56,
-                font_path="assets/BitcountInk.ttf",
+                font_path=TITLE_FONT,
                 text_list=(
                     f"{self.current_player} is playing.",
                     f"{self.current_player} is playing..",
@@ -194,20 +213,19 @@ class Game:
                         center=(self.size[0]/2, self.size[1]/8),
                         min_size=48,
                         max_size=56,
-                        font_path="assets/BitcountInk.ttf",
+                        font_path=TITLE_FONT,
                         text=f"Its a TIE!"
                     )
 
-                elif winner in ( self.player_1, self.player_2 ):
+                elif winner != "":
                     
                     self.mode = MODE_GAME_ENDED
-                    self.title.set_text(f"{self.next_player} wins!")
                     
                     self.title = PulsingText(
                         center=(self.size[0]/2, self.size[1]/8),
                         min_size=48,
                         max_size=56,
-                        font_path="assets/BitcountInk.ttf",
+                        font_path=TITLE_FONT,
                         text=f"{self.next_player} wins!"
                     )
 
@@ -229,6 +247,9 @@ class Game:
 
             if self.line is not None:
                 self.line.draw(self.screen)
+
+            # Draw scoreboard
+            self.scoreboard.draw(self.screen)
 
         pygame.display.flip()
 
