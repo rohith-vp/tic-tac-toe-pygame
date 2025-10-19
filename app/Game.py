@@ -229,6 +229,8 @@ class Game:
                         text=f"{self.next_player} wins!"
                     )
 
+                    self.scoreboard.increment_score(winner)
+
 
     def render(self):
         self.screen.fill((0, 0, 0))
