@@ -1,5 +1,5 @@
 import pygame
-from Textbox import Textbox
+from components.Textbox import Textbox
 
 
 class PulsingText(Textbox):
