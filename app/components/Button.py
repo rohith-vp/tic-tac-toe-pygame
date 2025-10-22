@@ -16,6 +16,7 @@ class Button:
         border_width: float,
         border_radius: float
     ):
+        # Button properties
         self.label = label
         self.center = center
         self.btn_size = btn_size
@@ -24,20 +25,23 @@ class Button:
         self.border_width = border_width
         self.border_radius = border_radius
 
+        # Rectangle for button area and collision detection
         self.rect = pygame.Rect(0, 0, btn_size[0], btn_size[1])
         self.rect.center = center
 
+        # Font and rendered label
         self.font = pygame.font.Font(resource_path(font_path), font_size)
         self.label_surface = self.font.render(label, True, font_color)    
         self.label_rect = self.label_surface.get_rect(center=center)
 
 
     def check_click(self, mouse_pos: tuple[float, float]):
+        # Return True if the mouse click is within the button
         return self.rect.collidepoint(mouse_pos[0], mouse_pos[1])
 
 
     def draw(self, screen: pygame.Surface):
-        # Draw rounded rectange
+        # Draw button border (rounded rectangle)
         pygame.draw.rect(
             surface=screen,
             rect=self.rect,
@@ -46,5 +50,5 @@ class Button:
             border_radius=self.border_radius
         )
 
-        # Display text
+        # Draw the button text
         screen.blit(self.label_surface, self.label_rect)

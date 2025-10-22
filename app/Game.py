@@ -2,7 +2,6 @@ import pygame
 import sys
 
 from views.MenuView import MenuView
-
 from utils import resource_path
 
 
@@ -15,7 +14,7 @@ INSTRUCTION_TEXT_FONT = "assets/0xProtoNerdFont-Regular.ttf"
 
 class Game:
     def __init__(self, size, caption, fps):
-        # Initialize pygame, set window caption and icon
+        # Basic setup for pygame window and resources
         pygame.init()
         pygame.font.init()
         pygame.display.set_caption(caption)
@@ -23,36 +22,36 @@ class Game:
             pygame.image.load(resource_path(ICON))
         )
 
-        # Intialize screen and clock for fps
+        # Create display surface and frame rate control
         self.screen = pygame.display.set_mode(size)
         self.clock = pygame.time.Clock()
         self.fps = fps
 
-        # Initialize menu view
-        self.view = None
+        # Start with the main menu view
         self.view = MenuView(
             self.screen, caption, TITLE_FONT, MAIN_TEXT_FONT, INSTRUCTION_TEXT_FONT
         )
 
-        # Initialize game variables
-        self.running = False
-
 
     def render(self):
+        # Clear the screen and draw the current view
         self.screen.fill((0, 0, 0))
         self.view.draw()
         pygame.display.flip()
 
 
     def loop(self):
+        # Main per-frame event handling and updating
         events = pygame.event.get()
 
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
 
+            # Pass all events to the active view
             self.view.handle_events(events)
 
+        # Update current view logic and transition if needed
         self.view.update()
         self.view = self.view.get_new_view()
 
@@ -61,13 +60,14 @@ class Game:
 
 
     def start_loop(self):
+        # Run the main game loop until closed
         self.running = True
         while self.running:
             self.loop()
         self.quit_game()
 
-    
+
     def quit_game(self):
+        # Cleanly shut down the game
         pygame.quit()
         sys.exit()
-        
