@@ -9,6 +9,7 @@ from components.PulsingText import PulsingText
 from components.AnimatedLine import AnimatedLine
 from components.Scoreboard import Scoreboard
 from components.MarkSprite import MarkSprite, X_SPRITE, O_SPRITE
+from components.Button import Button
 
 
 
@@ -16,22 +17,16 @@ class GameView(View):
     def __init__(
             self,
             screen: pygame.Surface,
-            title_font_path: str
+            title_font_path: str,
+            main_font_path: str
     ):
         super().__init__(screen)
 
-        self.size = screen.get_size()
         self.title_font_path = title_font_path
-
-        # Board for storing X and O
-        self.board = [
-            ["", "", ""],
-            ["", "", ""],
-            ["", "", ""]
-        ]
+        self.size = screen.get_size()
 
         # Initialize grid
-        self.grid = Grid((self.size[0]/2, self.size[1]/2))
+        self.grid = Grid((self.size[0]/2, self.size[1]/2.5))
 
         # Sprite group for storing X and O marks
         self.mark_sprites = pygame.sprite.Group()
@@ -39,28 +34,55 @@ class GameView(View):
         # Set marks for both players
         self.player_1 = "X"
         self.player_2 = "O"
+
+        self.new_game()
+
+        # Initialize scoreboard
+        self.scoreboard = Scoreboard(
+            (self.size[0] / 2, self.size[1] - 100),
+            (300, 100)
+        )
+
+        # Initialize reset button
+        self.reset_btn = Button(
+            "⟳ Reset",
+            main_font_path,
+            24,
+            (255, 255, 255),
+            (self.size[0] / 2, self.size[1] / 1.35),
+            (150, 50),
+            (0, 0, 0),
+            (255, 255, 255),
+            3,
+            10
+        )
+
+
+    def new_game(self):
+        # Board for storing X and O
+        self.board = [
+            ["", "", ""],
+            ["", "", ""],
+            ["", "", ""]
+        ]
+
         self.current_player = self.player_1
         self.next_player = self.player_2
 
         # Animated line for marking victory
         self.line = None
+        self.mark_sprites.empty()
 
         # Set title
         self.title = ChangingText(
-            center=(self.size[0]/2, self.size[1]/8),
+            center=(self.size[0]/2, self.size[1]/12),
             size=56,
-            font_path=title_font_path,
+            font_path=self.title_font_path,
             text_list=(
                 f"{self.current_player} is playing.",
                 f"{self.current_player} is playing..",
                 f"{self.current_player} is playing..."
             )
-        )
-
-        # Initialize scoreboard
-        self.scoreboard = Scoreboard(
-            (self.size[0] / 2, self.size[1] - 100),
-            (500, 100)
         )
 
 
@@ -83,7 +105,7 @@ class GameView(View):
             self.current_player, self.next_player = self.next_player, self.current_player
 
             self.title = ChangingText(
-                center=(self.size[0]/2, self.size[1]/8),
+                center=(self.size[0]/2, self.size[1]/12),
                 size=56,
                 font_path=self.title_font_path,
                 text_list=(
@@ -161,7 +183,7 @@ class GameView(View):
                     # self.mode = MODE_GAME_ENDED
                     
                     self.title = PulsingText(
-                        center=(self.size[0]/2, self.size[1]/8),
+                        center=(self.size[0]/2, self.size[1]/12),
                         min_size=48,
                         max_size=56,
                         font_path=self.title_font_path,
@@ -169,6 +191,10 @@ class GameView(View):
                     )
 
                     self.scoreboard.increment_score(winner)
+
+        elif self.reset_btn.check_click(pos):
+            
+            self.new_game()
 
 
     def handle_events(self, events: List[pygame.event.Event]):
@@ -186,7 +212,10 @@ class GameView(View):
 
         mouse_pos = pygame.mouse.get_pos()
 
-        if self.grid.cell_clicked(mouse_pos):
+        if (
+            self.grid.cell_clicked(mouse_pos) or
+            self.reset_btn.check_click(mouse_pos)
+        ):
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
         else:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW) 
@@ -213,3 +242,6 @@ class GameView(View):
 
         # Draw scoreboard
         self.scoreboard.draw(self.screen)
+        
+        # Draw reset button
+        self.reset_btn.draw(self.screen)

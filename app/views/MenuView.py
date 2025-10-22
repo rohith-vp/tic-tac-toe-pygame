@@ -19,8 +19,8 @@ class MenuView(View):
     ):
         super().__init__(screen)
 
-        self.new_view = self
         self.title_font_path = title_font_path
+        self.main_font_path = main_font_path
         size = self.screen.get_size()
 
         self.title = Textbox(
@@ -48,7 +48,7 @@ class MenuView(View):
 
     def start_game(self):
         self.new_view = GameView(
-            self.screen, self.title_font_path
+            self.screen, self.title_font_path, self.main_font_path
         )
 
 
@@ -60,10 +60,6 @@ class MenuView(View):
                 mouse_pos = pygame.mouse.get_pos()
                 print("Mouse clicked: ", mouse_pos)
                 self.start_game()
-
-
-    def get_new_view(self):
-        return self.new_view
 
 
     def update(self):
