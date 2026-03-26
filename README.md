@@ -48,3 +48,5 @@ To build your own standalone binary using PyInstaller:
 ```bash
 uv run pyinstaller --onefile --windowed --icon=icon.ico --add-data=assets:assets ./app/main.py
 ```
+
+-
